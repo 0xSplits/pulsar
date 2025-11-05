@@ -20,8 +20,13 @@ func (h *Handler) HandlerFunc(w http.ResponseWriter, r *http.Request) error {
 		"message", "received websocket request",
 	)
 
-	if !h.verify(r.Header.Get("Authorization")) {
-		return tracer.Mask(invalidWebsocketSecretError)
+	var aut string
+	{
+		aut = r.Header.Get("Authorization")
+	}
+
+	if !h.verify(aut) {
+		return tracer.Mask(invalidWebsocketSecretError, tracer.Context{Key: "redacted", Value: strings.Repeat("*", len(aut))})
 	}
 
 	var opt *websocket.AcceptOptions
