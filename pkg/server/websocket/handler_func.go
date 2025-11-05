@@ -15,6 +15,11 @@ import (
 func (h *Handler) HandlerFunc(w http.ResponseWriter, r *http.Request) error {
 	var err error
 
+	h.log.Log(
+		"level", "info",
+		"message", "received websocket request",
+	)
+
 	if !h.verify(r.Header.Get("Authorization")) {
 		return tracer.Mask(invalidWebsocketSecretError)
 	}

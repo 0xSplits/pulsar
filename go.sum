@@ -1,3 +1,5 @@
+github.com/0xSplits/indexingo v0.1.0 h1:t4Bl+LpUTG3tpNAJG8JIMTAr4UOgo+JhanBwBBaRJhs=
+github.com/0xSplits/indexingo v0.1.0/go.mod h1:nS0gqM7Y3n++v/5OU2dTtjo5u1pAOKLNnk3KuX2Ic9g=
 github.com/0xSplits/otelgo v0.1.2 h1:QjbUMNNQcUsnkOmZ35bc3Fbhz7u0PA611LYrh4aOpPk=
 github.com/0xSplits/otelgo v0.1.2/go.mod h1:YnmWxWUT7xaMQTF3FBmN8GuvIMafSJ/lYhlyIBlr99w=
 github.com/0xSplits/pulsargocode v0.1.0 h1:wWHCxp+IfxZIJ6mbxnG2hG+R8Hrpu15lPbI6n8udRuY=

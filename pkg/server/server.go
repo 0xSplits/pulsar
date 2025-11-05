@@ -81,7 +81,18 @@ func New(c Config) *Server {
 
 			{
 				w.Header().Set("Content-Type", "text/plain")
-				_, _ = w.Write(linBrk([]byte(err.Error())))
+			}
+
+			if err != nil {
+				c.Log.Log(
+					"level", "error",
+					"message", "request failed",
+					"stack", tracer.Json(err),
+				)
+
+				{
+					_, _ = w.Write(linBrk([]byte(err.Error())))
+				}
 			}
 		})
 	}

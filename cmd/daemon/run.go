@@ -1,6 +1,7 @@
 package daemon
 
 import (
+	"fmt"
 	"os"
 	"os/signal"
 	"syscall"
@@ -36,6 +37,11 @@ func (r *run) runE(cmd *cobra.Command, arg []string) error {
 
 	if env.RunWorker {
 		go dae.Worker().Daemon()
+	}
+
+	err := dae.Ensure()
+	if err != nil {
+		fmt.Print(err.Error())
 	}
 
 	// --------------------------------------------------------------------- //
