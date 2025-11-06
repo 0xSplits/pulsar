@@ -131,27 +131,27 @@ func (d *Daemon) Ensure() error {
 
 	//--------------------------------------------------------------------------//
 
-	var bpr pipelines.BackfillPipelineRequest
-	{
-		bpr = pipelines.BackfillPipelineRequest{
-			Network:   "base",
-			Value:     "0xb7f5bf799fb265657c628ef4a13f90f83a3a616a",
-			BeatStart: 37740907,
-		}
-	}
+	// var bpr pipelines.BackfillPipelineRequest
+	// {
+	// 	bpr = pipelines.BackfillPipelineRequest{
+	// 		Network:   "base",
+	// 		Value:     "0xb7f5bf799fb265657c628ef4a13f90f83a3a616a",
+	// 		BeatStart: 37740907,
+	// 	}
+	// }
 
-	{
-		res, err := pip.BackfillPipeline("test-pipeline", bpr)
-		if err != nil {
-			tracer.Panic(tracer.Mask(err))
-		}
+	// {
+	// 	res, err := pip.BackfillPipeline("test-pipeline", bpr)
+	// 	if err != nil {
+	// 		tracer.Panic(tracer.Mask(err))
+	// 	}
 
-		d.log.Log(
-			"level", "info",
-			"message", "backfill instruction",
-			"status", res.Message,
-		)
-	}
+	// 	d.log.Log(
+	// 		"level", "info",
+	// 		"message", "backfill instruction",
+	// 		"status", res.Message,
+	// 	)
+	// }
 
 	return nil
 }
