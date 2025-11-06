@@ -58,19 +58,23 @@ func (d *Daemon) Ensure() error {
 
 	//--------------------------------------------------------------------------//
 
+	//
+	//     curl -s --location --globoff 'https://app.indexing.co/dw/transformations/test?network=base&beat=37740907&filter=xh3b4sd-test-filter&filterKeys[0]=to&filterKeys[1]=from' --header "x-api-key: $INDEXINGCO_API_KEY" --form 'code="function traByBlock(blo) { const tra = templates.tokenTransfers(blo); return tra.map(x => ({ network: blo._network, chainId: utils.evmChainToId(blo._network), blockHash: blo.hash, blockNumber: blo.number, timestamp: utils.blockToTimestamp(blo), ...x, })); }"' | jq .
+	//
+
 	var cod string
 	{
 		cod = `
-			function txfersByBlock(blo) {
+			function traByBlock(blo) {
 				const tra = templates.tokenTransfers(blo);
 
-				return tra.map(txfer => ({
+				return tra.map(x => ({
 					network: blo._network,
 					chainId: utils.evmChainToId(blo._network),
 					blockHash: blo.hash,
 					blockNumber: blo.number,
 					timestamp: utils.blockToTimestamp(blo),
-					...tra,
+					...x,
 				}));
 			}
 		`
