@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"io"
 	"net"
 	"net/http"
 	"strings"
@@ -46,7 +47,7 @@ func (h *Handler) HandlerFunc(w http.ResponseWriter, r *http.Request) error {
 		// Read the next incoming message from the connected client.
 
 		_, byt, err := con.Read(context.Background())
-		if errors.Is(err, net.ErrClosed) {
+		if errors.Is(err, net.ErrClosed) || errors.Is(err, io.EOF) {
 			return nil
 		} else if err != nil {
 			return tracer.Mask(err)
