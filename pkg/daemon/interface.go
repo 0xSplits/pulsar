@@ -6,6 +6,7 @@ import (
 )
 
 type Interface interface {
+	Ensure() error
 	Server() *server.Server
 	Worker() *parallel.Worker
 }

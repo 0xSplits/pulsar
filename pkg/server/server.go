@@ -76,12 +76,11 @@ func New(c Config) *Server {
 			if websocket.IsInvalidWebsocketSecret(err) {
 				w.WriteHeader(http.StatusUnauthorized)
 			} else if err != nil {
-				w.WriteHeader(http.StatusInternalServerError)
-			}
-
-			{
-				w.Header().Set("Content-Type", "text/plain")
-				_, _ = w.Write(linBrk([]byte(err.Error())))
+				c.Log.Log(
+					"level", "error",
+					"message", "request failed",
+					"stack", tracer.Json(err),
+				)
 			}
 		})
 	}

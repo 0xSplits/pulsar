@@ -20,6 +20,7 @@ require (
 )
 
 require (
+	github.com/0xSplits/indexingo v0.1.0
 	github.com/beorn7/perks v1.0.1 // indirect
 	github.com/cespare/xxhash/v2 v2.3.0 // indirect
 	github.com/coder/websocket v1.8.14
