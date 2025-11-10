@@ -8,6 +8,8 @@ github.com/0xSplits/pulsargocode v0.1.0 h1:wWHCxp+IfxZIJ6mbxnG2hG+R8Hrpu15lPbI6n
 github.com/0xSplits/pulsargocode v0.1.0/go.mod h1:lt3sg7Pvgam0AEOINEdoyHO2z80n4W7tm6XuDmm1kaA=
 github.com/0xSplits/workit v0.7.1 h1:ER2ITiqmahwoN94oz9XCUvdUJLnYB5yZyA9y8FAOwug=
 github.com/0xSplits/workit v0.7.1/go.mod h1:Ylbvjp0puOXWNVzYtI0cxFO37hqPNy/prwHIWau2gpQ=
+github.com/DATA-DOG/go-sqlmock v1.5.2 h1:OcvFkGmslmlZibjAjaHm3L//6LiuBgolP7OputlJIzU=
+github.com/DATA-DOG/go-sqlmock v1.5.2/go.mod h1:88MAG/4G7SMwSE3CeA0ZKzrT5CiOU3OJ+JlNzwDqpNU=
 github.com/beorn7/perks v1.0.1 h1:VlbKKnNfV8bJzeqoa4cOKqO6bYr3WgKZxO8Z16+hsOM=
 github.com/beorn7/perks v1.0.1/go.mod h1:G2ZrVWU2WbWT9wwq4/hrbKbnv/1ERSJQ0ibhJ6rlkpw=
 github.com/cespare/xxhash/v2 v2.3.0 h1:UL815xU9SqsFlibzuggzjXhog7bL6oX9BbNZnL2UFvs=
