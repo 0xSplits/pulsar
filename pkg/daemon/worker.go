@@ -1,7 +1,7 @@
 package daemon
 
 import (
-	"github.com/0xSplits/pulsar/pkg/worker/handler/image"
+	"github.com/0xSplits/pulsar/pkg/worker/handler/pipeline"
 	"github.com/0xSplits/workit/handler"
 	"github.com/0xSplits/workit/registry"
 	"github.com/0xSplits/workit/worker/parallel"
@@ -21,7 +21,7 @@ func (d *Daemon) Worker() *parallel.Worker {
 	{
 		par = parallel.New(parallel.Config{
 			Han: []handler.Cooler{
-				image.New(image.Config{Log: d.log}),
+				pipeline.New(pipeline.Config{Log: d.log}),
 			},
 			Log: d.log,
 			Reg: reg,
