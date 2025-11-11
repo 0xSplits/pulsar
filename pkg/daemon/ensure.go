@@ -3,61 +3,11 @@ package daemon
 import (
 	"fmt"
 
-	"github.com/0xSplits/indexingo/client"
-	"github.com/0xSplits/indexingo/filters"
 	"github.com/0xSplits/indexingo/pipelines"
-	"github.com/0xSplits/indexingo/transformations"
 	"github.com/xh3b4sd/tracer"
 )
 
 func (d *Daemon) Ensure() error {
-	var cli client.Interface
-	{
-		cli = client.New(client.Config{
-			Key: d.env.IndexingcoApiKey,
-		})
-	}
-
-	//--------------------------------------------------------------------------//
-
-	var fil *filters.Filters
-	{
-		fil = filters.New(filters.Config{
-			Cli: cli,
-		})
-	}
-
-	var tra *transformations.Transformations
-	{
-		tra = transformations.New(transformations.Config{
-			Cli: cli,
-		})
-	}
-
-	var pip *pipelines.Pipelines
-	{
-		pip = pipelines.New(pipelines.Config{
-			Cli: cli,
-		})
-	}
-
-	//--------------------------------------------------------------------------//
-
-	{
-		res, err := fil.AddValues("test-filter", []string{"0xb7f5bf799fb265657c628ef4a13f90f83a3a616a"})
-		if err != nil {
-			tracer.Panic(tracer.Mask(err))
-		}
-
-		d.log.Log(
-			"level", "info",
-			"message", "filter creation",
-			"status", res.Message,
-		)
-	}
-
-	//--------------------------------------------------------------------------//
-
 	//
 	//     curl -s --location --globoff 'https://app.indexing.co/dw/transformations/test?network=base&beat=37740907&filter=xh3b4sd-test-filter&filterKeys[0]=to&filterKeys[1]=from' --header "x-api-key: $INDEXINGCO_API_KEY" --form 'code="function traByBlock(blo) { const tra = templates.tokenTransfers(blo); return tra.map(x => ({ network: blo._network, chainId: utils.evmChainToId(blo._network), blockHash: blo.hash, blockNumber: blo.number, timestamp: utils.blockToTimestamp(blo), ...x, })); }"' | jq .
 	//
@@ -81,7 +31,7 @@ func (d *Daemon) Ensure() error {
 	}
 
 	{
-		res, err := tra.CreateTransformation("test-transformation", cod)
+		res, err := d.tra.CreateTransformation(fmt.Sprintf("%s-transformation", d.env.Environment), cod)
 		if err != nil {
 			tracer.Panic(tracer.Mask(err))
 		}
@@ -98,9 +48,9 @@ func (d *Daemon) Ensure() error {
 	var cpr pipelines.CreatePipelineRequest
 	{
 		cpr = pipelines.CreatePipelineRequest{
-			Name:           "test-pipeline",
-			Transformation: "test-transformation",
-			Filter:         "test-filter",
+			Name:           fmt.Sprintf("%s-pipeline", d.env.Environment),
+			Transformation: fmt.Sprintf("%s-transformation", d.env.Environment),
+			Filter:         fmt.Sprintf("%s-filter", d.env.Environment),
 			FilterKeys:     []string{"from", "to"},
 			Networks:       []string{"ethereum", "base"},
 			Enabled:        true,
@@ -117,7 +67,7 @@ func (d *Daemon) Ensure() error {
 	}
 
 	{
-		res, err := pip.CreatePipeline(cpr)
+		res, err := d.pip.CreatePipeline(cpr)
 		if err != nil {
 			tracer.Panic(tracer.Mask(err))
 		}
@@ -141,7 +91,7 @@ func (d *Daemon) Ensure() error {
 	// }
 
 	// {
-	// 	res, err := pip.BackfillPipeline("test-pipeline", bpr)
+	// 	res, err := d.pip.BackfillPipeline(fmt.Sprintf("%s-pipeline", d.env.Environment), bpr)
 	// 	if err != nil {
 	// 		tracer.Panic(tracer.Mask(err))
 	// 	}
