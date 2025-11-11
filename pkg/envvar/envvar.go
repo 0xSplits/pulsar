@@ -12,6 +12,7 @@ import (
 type Env struct {
 	Environment      string `split_words:"true" required:"true"`
 	IndexingcoApiKey string `split_words:"true" required:"true"`
+	PostgresUrl      string `split_words:"true" required:"true"`
 	WebsocketSecret  string `split_words:"true" required:"true"`
 
 	HttpHost string `split_words:"true" required:"true"`

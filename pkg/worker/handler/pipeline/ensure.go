@@ -1,6 +1,8 @@
 package pipeline
 
 import (
+	"fmt"
+	"strconv"
 	"time"
 
 	"cirello.io/pglock"
@@ -8,10 +10,13 @@ import (
 	"github.com/xh3b4sd/tracer"
 )
 
+const (
+	// limit is the maximum amount of wallet addresses to search for at once.
+	limit = 10
+)
+
 func (h *Handler) Ensure() error {
 	var err error
-
-	// TODO add logging
 
 	var loc *pglock.Lock
 	{
@@ -25,6 +30,13 @@ func (h *Handler) Ensure() error {
 		return nil // lock not acquired
 	}
 
+	h.log.Log(
+		"level", "info",
+		"message", "acquired distributed lock",
+		"owner", loc.Owner(),
+		"version", strconv.FormatInt(loc.RecordVersionNumber(), 10),
+	)
+
 	{
 		defer h.loc.Release(loc) // nolint:errcheck
 	}
@@ -37,12 +49,32 @@ func (h *Handler) Ensure() error {
 		}
 	}
 
+	h.log.Log(
+		"level", "info",
+		"message", "searched pagination cursor",
+		"cursor", strconv.FormatInt(cur.Unix(), 10),
+	)
+
 	var res accounts.SearchResponse
 	{
-		res, err = h.acc.Search(cur.Unix())
+		res, err = h.acc.Search(cur.Unix(), limit)
 		if err != nil {
 			return tracer.Mask(err)
 		}
+	}
+
+	h.log.Log(
+		"level", "info",
+		"message", "searched account addresses",
+		"amount", strconv.Itoa(len(res.Data)),
+	)
+
+	// Note that we do not update the cursor in case of an empty search result.
+	// That means we are searching for accounts with the very same cursor until we
+	// find an actual non-empty result again.
+
+	if len(res.Data) == 0 {
+		return nil
 	}
 
 	var add []string
@@ -55,24 +87,33 @@ func (h *Handler) Ensure() error {
 	// results received from the accounts/search endpoint.
 
 	{
-		_, err = h.fil.AddValues("test-filter", add) // TODO fix the filter name, add environment
+		_, err = h.fil.AddValues(fmt.Sprintf("%s-filter", h.env.Environment), add)
 		if err != nil {
 			return tracer.Mask(err)
 		}
 	}
 
-	// There is potentially a gap issue between consecutive calls of this worker
-	// handler. So we should try to ensure a little bit of cursor overlap across
-	// consecutive calls in order to prevent any gaps in our observed accounts
-	// list. Note that setting back the next cursor by 30 seconds will cause
-	// duplicated data to be received from the accounts/search API. Though this
-	// should not be an issue as described above.
+	h.log.Log(
+		"level", "info",
+		"message", "updated pipeline filter",
+		"amount", strconv.Itoa(len(res.Data)),
+	)
+
+	// Given the next page, set the next cursor to this next page. If there is no
+	// next page, then we are at the end of the line. Given that we have accounts
+	// on that last page, set the next cursor to the created timestamp of this
+	// very last result object. If there is no next page, and if there is no data,
+	// then return early as to not update the next cursor, and keep the current
+	// cursor in place for the next iteration. This last case should never happen
+	// if the accounts/search API works properly.
 
 	var nxt time.Time
 	if res.Next != nil {
-		nxt = time.Unix(*res.Next-30, 0)
+		nxt = time.Unix(*res.Next, 0)
+	} else if len(res.Data) != 0 {
+		nxt = time.Unix(res.Data[len(res.Data)-1].Created, 0)
 	} else {
-		nxt = time.Now().UTC()
+		return nil
 	}
 
 	{
@@ -81,6 +122,13 @@ func (h *Handler) Ensure() error {
 			return tracer.Mask(err)
 		}
 	}
+
+	h.log.Log(
+		"level", "info",
+		"message", "updated pagination cursor",
+		"next", strconv.FormatInt(nxt.Unix(), 10),
+		"delta", strconv.FormatInt(nxt.Unix()-cur.Unix(), 10),
+	)
 
 	return nil
 }

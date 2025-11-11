@@ -19,12 +19,13 @@ type SearchResponseObject struct {
 	Created int64  `json:"created"`
 }
 
-func (a *Accounts) Search(cur int64) (SearchResponse, error) {
+func (a *Accounts) Search(cur int64, lim int64) (SearchResponse, error) {
 	var err error
 
 	var qry url.Values
 	{
 		qry.Set("cursor", strconv.FormatInt(cur, 10))
+		qry.Set("limit", strconv.FormatInt(lim, 10))
 	}
 
 	var pat string

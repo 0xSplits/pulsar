@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/0xSplits/indexingo/filters"
+	"github.com/0xSplits/pulsar/pkg/envvar"
 	"github.com/0xSplits/pulsar/pkg/worker/handler/pipeline/accounts"
 	"github.com/0xSplits/pulsar/pkg/worker/handler/pipeline/cursor"
 	"github.com/0xSplits/pulsar/pkg/worker/handler/pipeline/locker"
@@ -13,15 +14,12 @@ import (
 	"github.com/xh3b4sd/tracer"
 )
 
-// TODO wire up in daemon
-
 type Config struct {
 	// Acc is the accounts client to search iteratively for all relevant wallet
 	// addresses known to the system.
 	Acc *accounts.Accounts
-	// Dsn is the data source name for the underlying Postgres instance in order
-	// to establish a new database connection.
-	Dsn string
+	// Env is the configuration injected into the process environment.
+	Env envvar.Env
 	// Fil is the pipeline filter kept up to date by this worker handler.
 	Fil *filters.Filters
 	// Log is the standard logger interface to emit useful log messages at
@@ -32,6 +30,7 @@ type Config struct {
 type Handler struct {
 	acc *accounts.Accounts
 	cur *cursor.Cursor
+	env envvar.Env
 	fil *filters.Filters
 	jit *jitter.Jitter[time.Duration]
 	loc *locker.Locker
@@ -42,8 +41,8 @@ func New(c Config) *Handler {
 	if c.Acc == nil {
 		tracer.Panic(tracer.Mask(fmt.Errorf("%T.Acc must not be empty", c)))
 	}
-	if c.Dsn == "" {
-		tracer.Panic(tracer.Mask(fmt.Errorf("%T.Dsn must not be empty", c)))
+	if c.Env.Environment == "" {
+		tracer.Panic(tracer.Mask(fmt.Errorf("%T.Env must not be empty", c)))
 	}
 	if c.Fil == nil {
 		tracer.Panic(tracer.Mask(fmt.Errorf("%T.Fil must not be empty", c)))
@@ -64,7 +63,7 @@ func New(c Config) *Handler {
 	var cur *cursor.Cursor
 	{
 		cur = cursor.New(cursor.Config{
-			Dsn: c.Dsn,
+			Dsn: c.Env.PostgresUrl,
 			Log: c.Log,
 		})
 	}
@@ -86,7 +85,7 @@ func New(c Config) *Handler {
 	var loc *locker.Locker
 	{
 		loc = locker.New(locker.Config{
-			Dsn: c.Dsn,
+			Dsn: c.Env.PostgresUrl,
 			Log: c.Log,
 		})
 	}
@@ -101,6 +100,7 @@ func New(c Config) *Handler {
 	return &Handler{
 		acc: c.Acc,
 		cur: cur,
+		env: c.Env,
 		fil: c.Fil,
 		jit: jitter.New[time.Duration](jitter.Config{Per: 0.20}),
 		loc: loc,
